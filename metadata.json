@@ -1,0 +1,6 @@
+{
+  "name": "Rainscape Atmosphere Editor",
+  "description": "An immersive, cinematic atmosphere editor featuring David Hoskins' legendary 'Heartfelt' GLSL raindrop shader with highly customizable refraction and fluid backgrounds.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
