@@ -12,6 +12,9 @@ An atmospheric writing surface where your words shape the weather. Type your tho
 - **Background media** — drop in any image or video as the scene's substrate.
 - **Save as Markdown** — export the current note as `.md` with YAML frontmatter (date, mood, char count). Keyboard shortcut `⌘S` / `Ctrl+S`.
 
+## Use it everywhere
+https://sissi-moodwriter.dev/
+
 ## Run locally
 
 ```
