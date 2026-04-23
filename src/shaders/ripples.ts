@@ -76,7 +76,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
 
     vec3 base;
     if (u_has_background) {
-        base = texture(u_background, sampleUv).rgb;
+        base = texture(u_background, aspectCoverUV(sampleUv)).rgb;
     } else {
         base = proceduralBg(sampleUv);
     }

@@ -85,6 +85,7 @@ function buildProgram(gl: WebGL2RenderingContext, fragmentSource: string): GLSta
     speed: gl.getUniformLocation(program, 'u_speed'),
     background: gl.getUniformLocation(program, 'u_background'),
     hasBackground: gl.getUniformLocation(program, 'u_has_background'),
+    bgAspect: gl.getUniformLocation(program, 'u_bg_aspect'),
   };
 
   return { gl, program, vao, positionBuffer, texture, uniforms, vs, fs };
@@ -184,11 +185,16 @@ const SceneShader: React.FC<Props> = ({ scene, intensity, fog, refraction, speed
             /* ignore: image may not be ready yet */
           }
         }
+        const w = bg instanceof HTMLVideoElement ? bg.videoWidth : bg.naturalWidth;
+        const h = bg instanceof HTMLVideoElement ? bg.videoHeight : bg.naturalHeight;
+        const aspect = (w > 0 && h > 0) ? (w / h) : 0;
         gl.uniform1i(uniforms.background!, 0);
         gl.uniform1i(uniforms.hasBackground!, 1);
+        gl.uniform1f(uniforms.bgAspect!, aspect);
       } else {
         gl.uniform1i(uniforms.background!, 0);
         gl.uniform1i(uniforms.hasBackground!, 0);
+        gl.uniform1f(uniforms.bgAspect!, 0);
         lastTexRef.current = null;
       }
 

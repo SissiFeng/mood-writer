@@ -6,6 +6,7 @@ export interface AudioSettings {
   rainVolume: number;      // 0..1
   keyboardEnabled: boolean;
   keyboardVolume: number;  // 0..1
+  keyboardSwitch: string;  // switch profile id or 'random'
 }
 
 export class AudioEngine {
@@ -19,6 +20,7 @@ export class AudioEngine {
     rainVolume: 0.4,
     keyboardEnabled: true,
     keyboardVolume: 0.6,
+    keyboardSwitch: 'cherry-blue',
   };
 
   get isReady() { return this.ctx !== null && this.ctx.state === 'running'; }
@@ -42,6 +44,7 @@ export class AudioEngine {
 
         this.keys = new KeyboardSynth(this.ctx);
         this.keys.connect(this.master);
+        this.keys.setSwitch(this.settings.keyboardSwitch);
         if (this.settings.keyboardEnabled) {
           this.keys.setVolume(this.settings.keyboardVolume);
         }
@@ -86,6 +89,7 @@ export class AudioEngine {
 
     if (this.keys) {
       this.keys.setVolume(this.settings.keyboardEnabled ? this.settings.keyboardVolume : 0);
+      this.keys.setSwitch(this.settings.keyboardSwitch);
     }
   }
 

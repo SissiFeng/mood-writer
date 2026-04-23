@@ -26,6 +26,7 @@ uniform float u_refraction;
 uniform float u_speed;
 uniform sampler2D u_background;
 uniform bool u_has_background;
+uniform float u_bg_aspect;  // background width / height; 0 if no image
 
 // Shadertoy compat
 #define iTime u_time
@@ -35,6 +36,24 @@ uniform bool u_has_background;
 
 in vec2 v_texCoord;
 out vec4 outColor;
+
+// object-fit: cover — remap uv so the image fills the viewport without distortion.
+// uv is in [0..1]. Works for any aspect ratios.
+vec2 aspectCoverUV(vec2 uv) {
+  if (u_bg_aspect <= 0.0) return uv;
+  float vpAspect = u_resolution.x / u_resolution.y;
+  vec2 out_uv = uv;
+  if (u_bg_aspect > vpAspect) {
+    // image wider than viewport — crop horizontally
+    float s = vpAspect / u_bg_aspect;
+    out_uv.x = (uv.x - 0.5) * s + 0.5;
+  } else {
+    // image taller than viewport — crop vertically
+    float s = u_bg_aspect / vpAspect;
+    out_uv.y = (uv.y - 0.5) * s + 0.5;
+  }
+  return out_uv;
+}
 
 ${body}
 

@@ -20,6 +20,7 @@ import { mapTextToParams, type Mood } from './lib/moodMapper';
 import { AudioEngine, type AudioSettings } from './lib/audio/AudioEngine';
 import { SCENES, DEFAULT_SCENE_ID, findScene } from './shaders';
 import { saveAsMarkdown } from './lib/saveNote';
+import { SWITCHES, RANDOM_SWITCH_ID } from './lib/audio/KeyboardSynth';
 
 export default function App() {
   const [text, setText] = useState('');
@@ -34,8 +35,18 @@ export default function App() {
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [mediaElement, setMediaElement] = useState<HTMLImageElement | HTMLVideoElement | null>(null);
+  const [isDefaultBg, setIsDefaultBg] = useState(true);
   const [sceneId, setSceneId] = useState<string>(DEFAULT_SCENE_ID);
   const scene = findScene(sceneId);
+
+  // Load default background once on mount
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      setMediaElement((cur) => (cur === null ? img : cur)); // only set if user hasn't uploaded yet
+    };
+    img.src = '/bg-default.jpg';
+  }, []);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,17 +118,21 @@ export default function App() {
     if (type === 'video') {
       const video = document.createElement('video');
       video.muted = true; video.loop = true; video.playsInline = true;
-      video.onloadeddata = () => setMediaElement(video);
+      video.onloadeddata = () => { setMediaElement(video); setIsDefaultBg(false); };
       video.src = url;
       video.play().catch(e => console.error('video play failed:', e));
     } else {
       const img = new Image();
-      img.onload = () => setMediaElement(img);
+      img.onload = () => { setMediaElement(img); setIsDefaultBg(false); };
       img.src = url;
     }
   }, []);
 
-  const resetBackground = () => setMediaElement(null);
+  const restoreDefaultBackground = () => {
+    const img = new Image();
+    img.onload = () => { setMediaElement(img); setIsDefaultBg(true); };
+    img.src = '/bg-default.jpg';
+  };
   const manualMode = text.length === 0;
 
   return (
@@ -229,6 +244,30 @@ export default function App() {
                   onToggle={(v) => updateAudio({ keyboardEnabled: v })}
                   onVolume={(v) => updateAudio({ keyboardVolume: v })}
                 />
+
+                {/* Switch selector */}
+                <div className={`mt-3 transition-opacity ${audioSettings.keyboardEnabled ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+                  <div className="text-[9px] uppercase tracking-[0.25em] text-white/40 mb-1.5 ml-1">Switch</div>
+                  <div className="flex flex-wrap gap-1">
+                    {[{ id: RANDOM_SWITCH_ID, name: 'Random', description: 'Surprise — random switch every keystroke' }, ...SWITCHES].map((s) => {
+                      const active = audioSettings.keyboardSwitch === s.id;
+                      return (
+                        <button
+                          key={s.id}
+                          onClick={() => updateAudio({ keyboardSwitch: s.id })}
+                          title={s.description}
+                          className={`px-2 py-1 text-[9px] rounded-md border tracking-wider transition-all cursor-pointer ${
+                            active
+                              ? 'bg-white/15 border-white/30 text-white'
+                              : 'bg-white/[0.02] border-white/10 text-white/50 hover:bg-white/[0.06] hover:text-white/80'
+                          }`}
+                        >
+                          {s.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               {/* Scene selector */}
@@ -277,9 +316,9 @@ export default function App() {
                   <Upload size={14} className="opacity-50" />
                   Upload BG Image / Video
                 </button>
-                {mediaElement && (
-                  <button onClick={resetBackground} className="w-full py-2 text-[10px] uppercase tracking-widest text-white/30 hover:text-white/60 transition-colors cursor-pointer">
-                    Reset Background
+                {!isDefaultBg && (
+                  <button onClick={restoreDefaultBackground} className="w-full py-2 text-[10px] uppercase tracking-widest text-white/30 hover:text-white/60 transition-colors cursor-pointer">
+                    Restore Default
                   </button>
                 )}
                 <input ref={fileInputRef} type="file" accept="image/*,video/*" onChange={handleFileUpload} className="hidden" />

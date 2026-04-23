@@ -78,17 +78,18 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
     vec4 col;
     if (u_has_background) {
+        vec2 f = aspectCoverUV(focus);
         if (u_fog > 0.0) {
             float blur = u_fog * 0.015;
             col = vec4(0);
-            col += texture(u_background, focus + vec2(-blur, -blur));
-            col += texture(u_background, focus + vec2(blur, -blur));
-            col += texture(u_background, focus + vec2(-blur, blur));
-            col += texture(u_background, focus + vec2(blur, blur));
-            col += texture(u_background, focus) * 4.0;
+            col += texture(u_background, f + vec2(-blur, -blur));
+            col += texture(u_background, f + vec2(blur, -blur));
+            col += texture(u_background, f + vec2(-blur, blur));
+            col += texture(u_background, f + vec2(blur, blur));
+            col += texture(u_background, f) * 4.0;
             col /= 8.0;
         } else {
-            col = texture(u_background, focus);
+            col = texture(u_background, f);
         }
     } else {
         vec2 bg_uv = focus;
